@@ -6,8 +6,7 @@ library(diyar)
 # Test 1 - Consistent row position for input and output
 df <- data.frame(
   cri_1 = c("A","C","B","C","A"),
-  r_id = c(1:5)
-  )
+  r_id = c(1:5))
 
 test_1 <- df
 test_1$pids <- links_wf_probabilistic(attribute = df$cri_1, probabilistic = FALSE)
@@ -64,7 +63,7 @@ test_that("test that record grouping with >1 criteria follows an order of decrea
   expect_equal(test_3a$pids@pid_cri, c(2,2,2,0,2,1,1))
   expect_equal(test_3a$pids@pid_total, c(4,2,4,1,2,4,4))
   expect_equal(test_3b$pids@.Data, c(1,2,1,4,2,6,1))
-  expect_equal(test_3b$pids@pid_cri, c(2,2,2, 0,2,-1, 2))
+  expect_equal(test_3b$pids@pid_cri, c(2,2,2, 0,2,0, 2))
   expect_equal(test_3b$pids@pid_total, c(3,2,3,1,2,1,3))
 })
 

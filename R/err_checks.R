@@ -547,7 +547,7 @@ err_overlap_methods_2 <- function(overlap_methods, lengths, overlap_methods_nm, 
     overlap_methods <- list(overlap_methods)
   }
   if(!length(overlap_methods) %in% c(1, length(lengths))){
-    errs <- paste0("`", overlap_methods_nm, "` must have one element or the same number in `", lengths_nm ,"`:\n",
+    errs <- paste0("`", overlap_methods_nm, "` must have one element or the same number as `", lengths_nm ,"`:\n",
                    "X - `", overlap_methods_nm, "` has ", length(overlap_methods)," ", ifelse(length(overlap_methods) == 1, "element", "elements"), "\n",
                    "X - `", lengths_nm, "` has ", length(lengths)," ", ifelse(length(lengths) == 1, "element", "elements"),".")
     return(errs)

@@ -483,66 +483,73 @@ scale_size <- function(size_lims, count_upper_lim, pts_n, decreasing = TRUE){
   }
 }
 
-length_to_range <- function(lengths, date, from_last, episode_unit, skip_if_b4_lengths = FALSE){
-  if(!inherits(lengths, "list")){
-    lengths <- list(range = list(lengths))
+length_to_range <- function(
+    x, date, from_last, episode_unit,
+    skip_if_b4_lengths = FALSE, output = 'length'){
+  if(!inherits(x, "list")){
+    x <- list(length = list(x))
   }else{
-    lengths <- list(range = lengths)
+    x <- list(length = x)
   }
 
-  lengths$range <- lapply(lengths$range, function(x){
-    if(!inherits(x, "number_line")){
-      x <- number_line(0, x)
+  x$opLgk <- list()
+  for(i in seq_len(length(x$length))){
+    if(!inherits(x$length[[i]], "number_line")){
+      x$length[[i]] <- number_line(0, x$length[[i]])
     }
-    return(x)
-  })
+    x$opLgk[[i]] <- x$length[[i]]@start == 0
+  }
 
-  if(any(from_last)) {
-    lengths$range <- lapply(lengths$range, function(x){
-      if(length(x) < length(from_last)){
-        x <- rep(x, length(date))
+  if(any(from_last)){
+    for(i in seq_len(length(x$length))){
+      if(length(x$length[[i]]) < length(from_last)){
+        x$length[[i]] <- rep(x$length[[i]], length(date))
       }
-      x@start <- as.numeric(x@start)
-      x[from_last] <- reverse_number_line(
-        invert_number_line(x[from_last]),
+      x$length[[i]]@start <- as.numeric(x$length[[i]]@start)
+      x$length[[i]][from_last] <- reverse_number_line(
+        invert_number_line(x$length[[i]][from_last]),
         direction = "decreasing")
-      return(x)
-    })
+    }
   }
 
   if(any(skip_if_b4_lengths == T)) {
-    lengths$coverage <- lapply(lengths$range, function(x){
-      matrix(c(left_point(x), right_point(x)), ncol = 2)
-    })
-    lengths$coverage <- do.call("cbind", lengths$coverage)
-    lengths$coverage <- number_line(
-      row_wise(lengths$coverage, type = "min"),
-      row_wise(lengths$coverage, type = "max")
+    x$coverage <- list()
+    for(i in seq_len(length(x$length))){
+      x$coverage[[i]] <- matrix(c(x$length[[i]]@start, right_point(x$length[[i]])), ncol = 2)
+    }
+    x$coverage <- do.call("cbind", x$coverage)
+    x$coverage <- number_line(
+      row_wise(x$coverage, type = "min"),
+      row_wise(x$coverage, type = "max")
     )
-    lgk <- lengths$coverage@start > 0 &
-      lengths$coverage@.Data > -abs(lengths$coverage@start)
-    left_point(lengths$coverage[lgk]) <- 0
+    lgk <- x$coverage@start > 0 &
+      x$coverage@.Data > -abs(x$coverage@start)
+    left_point(x$coverage[lgk]) <- 0
 
-    lgk <- lengths$coverage@start < 0 &
-      lengths$coverage@.Data < abs(lengths$coverage@start)
-    right_point(lengths$coverage[lgk]) <- 0
+    lgk <- x$coverage@start < 0 &
+      x$coverage@.Data < abs(x$coverage@start)
+    right_point(x$coverage[lgk]) <- 0
 
-    lengths$coverage <- epid_windows(
-      date = date,
-      lengths = lengths$coverage,
+    x$coverage <- epid_windows(
+      date = if(output == 'length') 0 else if(output == 'window') date,
+      lengths = x$coverage,
       episode_unit = names(episode_units)[episode_unit]
     )
   }
 
-  lengths$range <- lapply(lengths$range, function(x){
-    x <- epid_windows(
-      date = date,
-      lengths = x,
-      episode_unit = names(episode_units)[episode_unit]
-    )
-    return(x)
-  })
-  return(lengths)
+  for(i in seq_len(length(x$length))){
+    x$length[[i]] <- epid_windows(
+      date = if(output == 'length') 0 else if(output == 'window') date,
+      lengths = x$length[[i]],
+      episode_unit = names(episode_units)[episode_unit])
+  }
+  for(i in seq_len(length(x$length))){
+    if(length(x$length[[i]]) == 1){
+      x$length[[i]] <- rep(x$length[[i]], length(date))
+      x$opLgk[[i]] <- rep(x$opLgk[[i]], length(date))
+    }
+  }
+  return(x)
 }
 
 opt_level <- function(opt, mth, tr_mth){
@@ -1438,3 +1445,6 @@ tmp.func <- function(x){
   }
   return(x)
 }
+
+same_group <- function(x, y) bys_count(x) == bys_count(y)
+same_id <- function(x, y) bys_count(x) == bys_count(y) & x == y

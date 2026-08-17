@@ -1,4 +1,4 @@
-context("testing number line object and functions")
+context("Unit tests - number_line() and related functions")
 
 library(testthat)
 library(diyar)
@@ -25,11 +25,11 @@ test_that("test direction of number line", {
   expect_equal(t4@start, NA_real_)
   expect_equal(t5@start, 20)
 
-  expect_equal(show(t1), "1 -> 10")
-  expect_equal(show(t2), "10 <- 1")
-  expect_equal(show(t3), "5 ?? NA")
-  expect_equal(show(t4), "NA ?? NA")
-  expect_equal(show(t5), "20 == 20")
+  expect_equal(format(t1), "1 -> 10")
+  expect_equal(format(t2), "10 <- 1")
+  expect_equal(format(t3), "5 ?? NA")
+  expect_equal(format(t4), "NA ?? NA")
+  expect_equal(format(t5), "20 == 20")
 
   expect_equal(format(number_line()), "number_line(0)")
 
@@ -69,19 +69,19 @@ test_that("test changing the number line", {
   expect_equal(t4@start, 5)
   expect_equal(t5@start, 20)
 
-  expect_equal(show(t1), "1 <- -8")
-  expect_equal(show(t2), "20 <- 11")
-  expect_equal(show(t3), "5 == 5")
-  expect_equal(show(t4), "5 -> 10")
-  expect_equal(show(t5), "20 <- 10")
+  expect_equal(format(t1), "1 <- -8")
+  expect_equal(format(t2), "20 <- 11")
+  expect_equal(format(t3), "5 == 5")
+  expect_equal(format(t4), "5 -> 10")
+  expect_equal(format(t5), "20 <- 10")
 
-  expect_equal(show(rep(t1, 3))[1:2], rep("1 <- -8", 2))
-  expect_equal(show(rep(t2, 3))[1:2], rep("20 <- 11", 2))
-  expect_equal(show(rep(t3, 3))[1:2], rep("5 == 5", 2))
-  expect_equal(show(rep(t4, 3))[1:2], rep("5 -> 10", 2))
-  expect_equal(show(rep(t5, 3))[1:2], rep("20 <- 10", 2))
+  expect_equal(format(rep(t1, 3))[1:2], rep("1 <- -8", 2))
+  expect_equal(format(rep(t2, 3))[1:2], rep("20 <- 11", 2))
+  expect_equal(format(rep(t3, 3))[1:2], rep("5 == 5", 2))
+  expect_equal(format(rep(t4, 3))[1:2], rep("5 -> 10", 2))
+  expect_equal(format(rep(t5, 3))[1:2], rep("20 <- 10", 2))
 
-  expect_equal(show(t5[[1:2]]), c("20 <- 10", "NA ?? NA" ))
+  expect_equal(format(t5[[1:2]]), c("20 <- 10", "NA ?? NA" ))
 
   expect_equal(reverse_number_line(number_line(1000,-123)), number_line(-123, 1000))
   expect_equal(reverse_number_line(number_line(1000,-123), "increasing"), number_line(1000, -123))

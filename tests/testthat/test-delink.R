@@ -1,4 +1,4 @@
-context("testing record_group function")
+context("Unit tests - delink()")
 
 library(testthat)
 library(diyar)

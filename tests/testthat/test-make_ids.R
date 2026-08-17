@@ -1,4 +1,4 @@
-context("testing make_ids function")
+context("Unit tests - make_ids()")
 
 library(testthat)
 library(diyar)

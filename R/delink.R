@@ -90,7 +90,11 @@ delink.pid <- function(x, lgk, ...){
   if(isTRUE(w_msg)){
     warning("An index/reference record has been unlinked!", call. = FALSE)
   }
-  x@.Data[lgk] <- x@link_id[lgk] <- x@sn[lgk]
+  x@link_id <- lapply(x@link_id, function(y){
+    y[lgk] <- x@sn[lgk]
+    return(y)
+  })
+  x@.Data[lgk] <- x@sn[lgk]
   x@pid_cri[lgk] <- 0L
   x@pid_total[lgk] <- 1L
   if(!is.null(x@pid_dataset)) x@pid_dataset[lgk] <- NA_character_

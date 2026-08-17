@@ -1,4 +1,4 @@
-context("Unit tests - episodes()")
+context("Unit tests - episodes_wf_repeats()")
 
 library(testthat)
 library(diyar)
@@ -9,18 +9,17 @@ suffix <- function(df, x){
   names(df) <- paste0(names(df), ".", x)
   df
 }
-
 v.decode <- function(x) as.vector(diyar::decode(x))
 uat.episodes <- function(..., to_s4 = T, by_strata = FALSE){
   if(to_s4 == F){
-    x <- as.data.frame(diyar::episodes(..., display = "none"), stringsAsFactors = FALSE)
+    x <- as.data.frame(diyar::episodes_wf_repeats(..., display = "none"), stringsAsFactors = FALSE)
     vrs <- grep('case_nm|wind_nm|epid_dataset', names(x), value = TRUE)
     for(v in vrs){
       if(length(x[[v]]) == 0) next
       x[[v]] <- v.decode(x[[v]])
     }
   }else{
-    x <- diyar::episodes(..., display = "none")
+    x <- diyar::episodes_wf_repeats(..., display = "none")
     x@options <- list()
   }
   return(x)

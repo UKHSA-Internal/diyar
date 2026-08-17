@@ -188,17 +188,19 @@ links <- function(
   web$options$batched <- lapply(web$options$batched, tolower)
   web$options$display <- tolower(web$options$display)
 
-  if(isTRUE(web$options$shrink)){
-    stepwise_method <- 'shrink_to_last_match'
+  if(missing(stepwise_method)){
+    if(isTRUE(web$options$shrink)){
+      stepwise_method <- 'shrink_to_last_match'
+    }
+    if(isTRUE(web$options$expand) & isFALSE(web$options$shrink)){
+      stepwise_method <- 'expand_with_priority'
+    }
+    if(isFALSE(web$options$expand) & isFALSE(web$options$shrink)){
+      stepwise_method <- 'ordered_only'
+    }
   }
-  if(isTRUE(web$options$expand) & isFALSE(web$options$shrink)){
-    stepwise_method <- 'expand_with_priority'
-  }
-  if(isFALSE(web$options$expand) & isFALSE(web$options$shrink)){
-    stepwise_method <- 'ordered_only'
-  }
-  show_link_id = TRUE
 
+  show_link_id = TRUE
   #
   if(inherits(web$options$recursive, "logical")){
     web$options$is_recursive <- web$options$recursive
@@ -535,13 +537,23 @@ links <- function(
           y_pos = web$rec.pairs$tr_pos,
           check_duplicates = web$options$check_duplicates)
 
-        web$export.nm <- names(web$rec.pairs$rec.match)
-        web$export.nm <- web$export.nm[!grepl("^logical|^equal", web$export.nm)]
-        if(length(web$export.nm) > 0){
-          web$export[[paste0("cri.", web$i)]][[paste0("iteration.", web$ite)]] <-
-            web$rec.pairs$rec.match[web$export.nm]
-          web$rec.pairs$rec.match[web$export.nm] <- NULL
+        # web$export.nm <- names(web$rec.pairs$rec.match)
+        # web$export.nm <- web$export.nm[!grepl("^logical|^equal", web$export.nm)]
+        # browser()
+        # if(length(web$export.nm) > 0){
+        #   web$export[[paste0("i.", web$ite)]] <-
+        #     web$rec.pairs$rec.match[web$export.nm]
+        #   web$rec.pairs$rec.match[web$export.nm] <- NULL
+        # }
+        tmp.mf.vrs <- grep('^mf', names(web$rec.pairs$rec.match), value = FALSE)
+        tmp.ef.vrs <- grep('^ef', names(web$rec.pairs$rec.match), value = FALSE)
+        if(length(tmp.mf.vrs) > 0){
+          web$export$mf[[paste0('i.', web$ite)]] <- web$rec.pairs$rec.match[tmp.mf.vrs]
         }
+        if(length(tmp.ef.vrs) > 0){
+          web$export$ef[[paste0('i.', web$ite)]] <- web$rec.pairs$rec.match[tmp.ef.vrs]
+        }
+        web$rec.pairs$rec.match[c(tmp.ef.vrs, tmp.mf.vrs)] <- NULL
       }else{
         web$rec.pairs[["rec.match"]] <- list(logical_test = rep(1, length(web$rec.pairs$cu_pos)))
       }
@@ -814,7 +826,7 @@ links <- function(
       "End",
       current_tot = web$n.row,
       memory_used =  utils::object.size(web[names(web)[names(web) != "report"]]))
-    web$report[length(web$report) + 1] <- list(web$rp_data)
+    web$report[[length(web$report) + 1]] <- list(web$rp_data)
   }
   #
   if(grepl("report$", web$options$display)){
@@ -834,4 +846,135 @@ links <- function(
   }
   web <- web$pids
   return(web)
+}
+
+#' @rdname links
+#' @export
+links_af_dt <- function(
+    criteria, sn = NULL, strata = NULL, data_source = NULL, data_links = "ANY",
+    display = "none", group_stats = FALSE, tie_sort = NULL,
+    stepwise_method = 'expand_with_priority'){
+
+  if(is.atomic(criteria)){
+    criteria <- list(criteria)
+  }
+  names(criteria) <- paste0('X',seq_len(length(criteria)))
+  repo <- data.table::setDT(criteria)
+  open.record <- length(criteria) + 1
+  repo[, c('row_sn', 'pid', 'wind_id', 'stg') := .(row_sn = .I, pid = .I, wind_id = .I, stg = open.record)]
+
+  if(!missing_wf.null(strata)){
+    repo[, strata := strata]
+  }
+  if(!missing_wf.null(tie_sort)){
+    repo[, tie_sort := tie_sort]
+  }
+
+  for(i in seq_len(open.record-1)){
+    if(!missing_wf.null(tie_sort)){
+      csort_var <- 'tie_sort'
+    }else{
+      csort_var <- NULL
+    }
+    data.table::setorderv(repo, c(paste0('X',i), 'stg', csort_var, 'row_sn'), na.last = TRUE)
+    # repo[, tmp.cri := get(paste0('X',i))]
+    repo[, c("tmp.cri", "bkp_pid") := .(tmp.cri = get(paste0('X',i)), bkp_pid = pid)]
+    if(!missing_wf.null(strata)){
+      repo[, tmp.cri := combi(strata, tmp.cri)]
+    }
+    repo[, include := !is.na(tmp.cri)]
+    if(stepwise_method == 'shrink_to_last_match' & i > 1){
+      repo[include == TRUE, include := stg == (i-1)]
+      repo[include == TRUE, c("tmp.cri", "bkp_pid", "pid") := .(tmp.cri = combi(tmp.cri, pid), bkp_pid = pid, pid = row_sn)]
+    }
+    if(stepwise_method == 'ordered_only'){
+      repo[include == TRUE, include := stg == open.record]
+    }
+    repo[include == TRUE, c("tmp_id", "tmp.wind", "tot") := .(tmp_id = pid[1], tmp.wind = row_sn[1], tot = .N), by = tmp.cri]
+    repo[, update := include & tot > 1]
+    if(!stepwise_method %in% c('expand_without_priority','shrink_to_last_match')){
+      repo[update == TRUE, update := stg == open.record]
+    }
+    wind_nm <- paste0('wind_id',i)
+    repo[update == TRUE, c("pid",  "stg") := .(pid = tmp_id,  stg = i)]
+    repo[update == TRUE, eval(wind_nm) := tmp.wind]
+    if(stepwise_method == 'shrink_to_last_match'){
+      repo[update == FALSE, pid := bkp_pid]
+    }
+    # repo[include == TRUE & tot > 1 & stg == open.record, c("pid", "stg") := .(pid = tmp_id, stg = i)]
+  }
+  data.table::setorderv(repo, 'row_sn', na.last = TRUE)
+  if(stepwise_method == 'shrink_to_last_match'){
+    repo[, pid := combi(pid, stg)]
+    repo[,  tot_final := .N, by = pid]
+    repo[tot_final == TRUE, stg := open.record]
+  }
+  repo[stg == open.record, stg := 0]
+  if(!inherits(data_links, "list")){
+    data_links <- list(l = data_links)
+  }
+  if(is.null(names(data_links))){
+    names(data_links) <- rep("l", length(data_links))
+  }
+  names(data_links) <- ifelse(
+    names(data_links) == "", "l", names(data_links))
+
+  cols <- paste0('wind_id', seq_len(open.record-1))
+  repo[, pid := make_pids(
+    y_pos = pid, x_pos = row_sn, pid_cri = as.integer(stg),
+    iteration = as.integer(stg), data_links = data_links,
+    link_id = unlist(as.list(repo)[cols], use.names = FALSE),
+    data_source = data_source
+    )]
+  return(repo$pid)
+}
+
+#' @rdname links
+#' @export
+links_af_modular <- function(
+    criteria, sn = NULL, strata = NULL, data_source = NULL, data_links = "ANY",
+    display = "none", group_stats = FALSE, tie_sort = NULL,
+    stepwise_method = 'expand_with_priority'){
+
+  if(!inherits(criteria, 'list')){
+    criteria <- list(criteria)
+  }
+
+  if(length(strata) == 0){
+    strata <- 1L
+  }
+
+  for(i in seq_len(length(criteria))){
+    unk <- is.na(criteria[[i]]) | is.na(strata)
+    criteria[[i]] <- combi(criteria[[i]], strata)
+    criteria[[i]][unk] <- -seq_len(length(unk[unk]))
+  }
+  pid <- criteria[[1]]
+
+  if(length(criteria) > 1){
+    for(i in 2:length(criteria)){
+      result <- merge_ids(
+        pid, criteria[[i]], stepwise_method = stepwise_method,
+        tie_sort = tie_sort)
+      pid <- result$id
+      if(i == 2){
+        stg <- result$stg
+      } else{
+        if(stepwise_method == 'shrink_to_last_match'){
+          stg[result$stg == 2 & stg == i - 1] <- i
+        }else{
+          stg[result$stg == 2] <- i
+        }
+      }
+    }
+  }else{
+    stg <- bys_count(pid) > 1
+  }
+
+  pid <- combi(pid)
+  pid <- make_pids(
+    y_pos = pid, x_pos = seq_len(length(pid)), pid_cri = as.integer(stg),
+    iteration = as.integer(stg), data_links = data_links, link_id = pid,
+    data_source = data_source)
+  return(pid)
 }

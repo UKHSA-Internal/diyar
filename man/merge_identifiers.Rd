@@ -11,13 +11,45 @@
 \usage{
 merge_ids(...)
 
-\method{merge_ids}{default}(id1, id2, tie_sort = NULL, expand = TRUE, shrink = FALSE, ...)
+\method{merge_ids}{default}(
+  id1,
+  id2,
+  tie_sort = NULL,
+  stepwise_method = "expand_with_priority",
+  expand = TRUE,
+  shrink = FALSE,
+  ...
+)
 
-\method{merge_ids}{pid}(id1, id2, tie_sort = NULL, expand = TRUE, shrink = FALSE, ...)
+\method{merge_ids}{pid}(
+  id1,
+  id2,
+  tie_sort = NULL,
+  stepwise_method = "expand_with_priority",
+  expand = TRUE,
+  shrink = FALSE,
+  ...
+)
 
-\method{merge_ids}{epid}(id1, id2, tie_sort = NULL, expand = TRUE, shrink = FALSE, ...)
+\method{merge_ids}{epid}(
+  id1,
+  id2,
+  tie_sort = NULL,
+  stepwise_method = "expand_with_priority",
+  expand = TRUE,
+  shrink = FALSE,
+  ...
+)
 
-\method{merge_ids}{pane}(id1, id2, tie_sort = NULL, expand = TRUE, shrink = FALSE, ...)
+\method{merge_ids}{pane}(
+  id1,
+  id2,
+  tie_sort = NULL,
+  stepwise_method = "expand_with_priority",
+  expand = TRUE,
+  shrink = FALSE,
+  ...
+)
 }
 \arguments{
 \item{...}{Other arguments}
@@ -47,23 +79,23 @@ See \code{Examples}.
 \examples{
 id1 <- rep(1, 5)
 id2 <- c(2, 2, 3, 3, 3)
-merge_ids(id1, id2, shrink = TRUE)
+merge_ids(id1, id2, stepwise_method = 'shrink_to_last_match')
 
-id1 <- c(rep(1, 3), 6, 7)
-id2 <- c(2,2,3,3,3)
-merge_ids(id1, id2, shrink = TRUE)
-merge_ids(id1, id2, expand = FALSE)
+id3 <- c(rep(1, 3), 6, 7)
+id4 <- c(2,2,3,3,3)
+merge_ids(id3, id4, stepwise_method = 'shrink_to_last_match')
+merge_ids(id3, id4, stepwise_method = 'ordered_only')
 
-id1 <- rep(1, 5)
-id2 <- c(1:3, 4, 4)
-merge_ids(id1, id2, shrink = TRUE)
-merge_ids(id1, id2, expand= FALSE)
+id5 <- rep(1, 5)
+id6 <- c(1:3, 4, 4)
+merge_ids(id5, id6, stepwise_method = 'shrink_to_last_match')
+merge_ids(id5, id6, stepwise_method = 'ordered_only')
 
 data(missing_staff_id)
 dfr <- missing_staff_id
-id1 <- links(dfr[[5]])
-id2 <- links(dfr[[6]])
-merge_ids(id1, id2)
+id7 <- links(dfr$hair_colour)
+id8 <- links(dfr$branch_office)
+merge_ids(id7, id8)
 }
 \seealso{
 \code{\link{links}}; \code{\link{links_af_probabilistic}}

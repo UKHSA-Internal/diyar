@@ -2,6 +2,8 @@
 % Please edit documentation in R/links.R
 \name{links}
 \alias{links}
+\alias{links_af_dt}
+\alias{links_af_modular}
 \title{Multistage record linkage}
 \usage{
 links(
@@ -22,6 +24,30 @@ links(
   repeats_allowed = FALSE,
   permutations_allowed = FALSE,
   ignore_same_source = FALSE,
+  stepwise_method = "expand_with_priority"
+)
+
+links_af_dt(
+  criteria,
+  sn = NULL,
+  strata = NULL,
+  data_source = NULL,
+  data_links = "ANY",
+  display = "none",
+  group_stats = FALSE,
+  tie_sort = NULL,
+  stepwise_method = "expand_with_priority"
+)
+
+links_af_modular(
+  criteria,
+  sn = NULL,
+  strata = NULL,
+  data_source = NULL,
+  data_links = "ANY",
+  display = "none",
+  group_stats = FALSE,
+  tie_sort = NULL,
   stepwise_method = "expand_with_priority"
 )
 }

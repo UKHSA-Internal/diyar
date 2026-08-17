@@ -68,7 +68,5 @@ make_ids <- function(x_pos, y_pos, id_length = max(x_pos, y_pos)){
 
   ids$group_id[is.na(ids$group_id)] <- ids$sn[is.na(ids$group_id)]
   ids$linked <- duplicated(ids$group_id, fromLast = TRUE) | duplicated(ids$group_id, fromLast = FALSE)
-
-  rm(list = ls()[ls() != "ids"])
   return(ids)
 }

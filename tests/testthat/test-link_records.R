@@ -6,8 +6,7 @@ library(diyar)
 # Test 1 - Consistent row position for input and output
 df <- data.frame(
   cri_1 = c("A","C","B","C","A"),
-  r_id = c(1:5)
-  )
+  r_id = c(1:5))
 
 test_1 <- df
 test_1$pids <- links_af_probabilistic(attribute = df$cri_1, probabilistic = FALSE)$pid
@@ -82,12 +81,12 @@ df_4a <- data.frame(
 
 test_4a <- df_4a
 test_4a$pids_1 <- links_af_probabilistic(attribute = test_4a$cri_1,
-                               probabilistic = FALSE,
-                               data_source = rep(1, 7))$pid
+                                         probabilistic = FALSE,
+                                         data_source = rep(1, 7))$pid
 test_4a$pids_2 <- links_af_probabilistic(blocking_attribute = test_4a$cri_2,
-                               attribute = list(test_4a$cri_2a, test_4a$cri_2b, test_4a$cri_2c),
-                               probabilistic = FALSE,
-                               data_source = rep(1, 7))$pid
+                                         attribute = list(test_4a$cri_2a, test_4a$cri_2b, test_4a$cri_2c),
+                                         probabilistic = FALSE,
+                                         data_source = rep(1, 7))$pid
 test_4a$pids <- merge_ids(test_4a$pids_1, test_4a$pids_2)
 
 test_that("test record grouping with 1 set of sub-criteria per criteria", {

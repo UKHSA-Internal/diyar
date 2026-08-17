@@ -457,7 +457,7 @@ print.epid_summary <- function(x, ...){
 as.data.frame.epid <- function(x, ..., decode = TRUE){
   x <- as.list(x, decode = decode)
   lgk <- as.logical(lapply(x, function(x) inherits(x, "d_label")))
-  x[lgk] <- lapply(x[lgk], as.vector)
+  # x[lgk] <- lapply(x[lgk], as.vector)
   as.data.frame(x, ...)
 }
 
@@ -551,7 +551,8 @@ setMethod("[[", signature(x = "epid"),
 #' @rdname epid-class
 setMethod("c", signature(x = "epid"), function(x,...) {
   tmp.func <- function(x) as.data.frame(x, decode = FALSE)
-  x <- to_s4(do.call("rbind", lapply(list(x, ...), tmp.func)))
+  x <- do.call("rbind", lapply(list(x, ...), tmp.func))
+  x <- to_s4(x)
   for (vr in methods::slotNames(x)){
     if(length(methods::slot(x, vr)) > 0){
       if(all(is.na(methods::slot(x, vr)))){
@@ -563,6 +564,19 @@ setMethod("c", signature(x = "epid"), function(x,...) {
       }
     }
   }
+  # x@case_nm <- decode(x@case_nm)
+  # attr(x@case_nm, 'value') <- -1:5
+  # attr(x@case_nm, 'label') <-
+  #   c("Skipped", "Case", "Recurrent", "Duplicate_C", "Duplicate_R",
+  #     "Case_CR", "Recurrent_CR")
+  # attr(x@case_nm, 'state') <- 'encoded'
+  #
+  # for (i in seq_len(length(x@wind_nm))) {
+  #   x@wind_nm[[i]] <- decode(x@wind_nm[[i]])
+  #   attr(x@wind_nm[[i]], 'value') <- 0:1
+  #   attr(x@wind_nm[[i]], 'label') <- c("Case", "Recurrence")
+  #   attr(x@wind_nm[[i]], 'state') <- 'encoded'
+  # }
   x
 })
 
@@ -983,7 +997,7 @@ print.pid_summary <- function(x, ...){
 as.data.frame.pid <- function(x, ..., decode = TRUE){
   x <- as.list(x, decode = decode)
   lgk <- as.logical(lapply(x, function(x) inherits(x, "d_label")))
-  x[lgk] <- lapply(x[lgk], as.vector)
+  # x[lgk] <- lapply(x[lgk], as.vector)
   as.data.frame(x, ...)
 }
 

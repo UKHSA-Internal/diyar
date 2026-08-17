@@ -1,4 +1,4 @@
-context("testing overlap functions")
+context("Unit tests - overlap() and related functions")
 
 library(testthat)
 library(diyar)

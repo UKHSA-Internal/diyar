@@ -341,18 +341,54 @@ invert_number_line <- function(x, point = "both"){
     point <- rep(point, length(x))
   }
 
-  x@start <- as.numeric(as.numeric(x@start))
-  indx <- which(point %in% c("left", "both"))
-  left_point(x[indx]) <- -x@start[indx]
-  indx <- which(point %in% c("right", "both"))
-  right_point(x[indx]) <- -(x@start[indx] + x@.Data[indx])
-  indx <- which(point == "start")
-  start_point(x[indx]) <- -start_point(x[indx])
-  indx <- which(point == "end")
-  end_point(x[indx]) <- -end_point(x[indx])
+  x@start <- as.numeric(x@start)
+
+  rdr <- x@.Data < 0
+  lgk <- (point %in% c("left", "both") | point == 'start' & !rdr | point == 'end' & rdr)
+  x@.Data[lgk] <- (x@start[lgk] * 2) + x@.Data[lgk]
+  x@start[lgk] <- -x@start[lgk]
+  lgk <- (point %in% c("right", "both") | point == 'end' & !rdr | point == 'start' & rdr)
+  x@.Data[lgk] <- x@.Data[lgk] - (x@.Data[lgk] * 2) - (x@start[lgk] * 2)
 
   return(x)
 }
+
+#' @rdname number_line
+#' @details
+#' \bold{\code{flip_number_line()}} - Flip number around a \code{point}.
+#' @examples
+#' # Flip `number_line` objects
+#' e
+#' flip_number_line(e)
+#' flip_number_line(e, "start")
+#' flip_number_line(e, "left")
+#'
+#' @export
+flip_number_line <- function(x, point = "left"){
+  if(missing(x)) stop("argument `x` is missing, with no default", call. = FALSE)
+  err <- err_object_types(x, "x", "number_line")
+  if(err != FALSE) stop(err, call. = FALSE)
+  if(length(x) == 0) return(x)
+  err <- err_match_ref_len(point, "x", c(1, length(x)), "point")
+  if(err != FALSE) stop(err, call. = FALSE)
+  err <- err_object_types(point, "point", "character")
+  if(err != FALSE) stop(err, call. = FALSE)
+  err <- err_invalid_opts(point, "point", c("start","end","left","right"))
+  if(err != FALSE) stop(err, call. = FALSE)
+
+  point <- tolower(point)
+  if(length(point) == 1){
+    point <- rep(point, length(x))
+  }
+
+  rdr <- x@.Data < 0
+  lgk <- rep(1L, length(point))
+  lgk[point == "left" | (point == 'start' & !rdr) | (point == 'end' & rdr)] <- -1L
+  x@start <- x@start + (x@.Data * lgk)
+
+  return(x)
+}
+
 # @details
 # \bold{\code{compress_number_line()}} - \code{"compress"} or \code{"collapse"} overlapping \code{number_line} into a new \code{number_line} that covers the \code{start} and \code{end} points of the originals.
 # This results in duplicate \code{number_line} with the \code{start} and \code{end} points of the newly expanded \code{number_line}
@@ -518,3 +554,14 @@ number_line_sequence <- function(x,
   }
 }
 
+#' @rdname number_line
+#' @export
+#'
+split_number_line <- function(x, precision = 1, fill = TRUE, ...){
+  y <- seq(start_point(x), end_point(x), ...)
+  if(fill){
+    y <- unique(c(y, end_point(x) + precision))
+  }
+  y <- number_line(y[1:length(y)-1], y[2:length(y)] - precision)
+  return(y)
+}

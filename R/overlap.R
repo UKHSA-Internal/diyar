@@ -100,137 +100,35 @@ overlaps <- function(x, y, methods = 8){
     methods <- overlap_method_codes(methods)
   }
 
+  tmp.mths <- methods[!duplicated(methods)]
+  tmp.mths <- overlap_method_names(tmp.mths)
+  tmp.mths <- unlist(strsplit(tmp.mths, "\\|"), use.names = FALSE)
+  tmp.Smths <- tmp.mths[tmp.mths %in% c('overlap', 'none')]
+  tmp.mths <- tmp.mths[!tmp.mths %in% c('overlap', 'none')]
+
+  lgk <- rep(FALSE, max(length(x), length(y), length(methods)))
   ov_lgk <- overlap(x, y)
-  lgk_2 <- rep(FALSE, length(ov_lgk))
+  methods <- mk_lazy_opt(methods)
+  if(length(tmp.Smths) > 0){
+    mth_lgk <- which(methods %in% c(overlap_methods$methods[tmp.Smths]))
+    lgk[mth_lgk] <- ov_lgk[mth_lgk]
+    tmp.lgk <- methods[mth_lgk] == overlap_method_codes('none')
+    lgk[mth_lgk[tmp.lgk]] <- !ov_lgk[mth_lgk[tmp.lgk]]
+  }
 
-  # None
-  mth_lgk <- which(methods %in% overlap_methods$methods[["none"]] &
-                     lgk_2 %in% c(FALSE, NA) &
-                     !ov_lgk)
-  lgk_2[mth_lgk] <- TRUE
-  if(all(lgk_2 == TRUE & !is.na(lgk_2))) {
-    return(lgk_2)
-  }
-  # Overlap
-  mth_lgk <- which(methods %in% overlap_methods$methods[["overlap"]] &
-                     lgk_2 %in% c(FALSE, NA) &
-                     ov_lgk)
-  lgk_2[mth_lgk] <- TRUE
-
-  if(all((lgk_2 == TRUE & !is.na(lgk_2)) | (!ov_lgk & !lgk_2))){
-    return(lgk_2)
-  }
-  # x_across_y
-  mth_lgk <- which(methods %in% overlap_methods$methods[["x_across_y"]] &
-                     lgk_2 %in% c(FALSE, NA) &
-                     ov_lgk)
-  if(length(mth_lgk) > 0){
-    lgk_2[mth_lgk] <- x_across_y(x[mth_lgk], y[mth_lgk])
-    if(all((lgk_2 == TRUE & !is.na(lgk_2)) | (!ov_lgk & !lgk_2))){
-      return(lgk_2)
+  ov_lgk <- which(ov_lgk)
+  for (tmp.mth in c(tmp.mths)) {
+    mth_lgk <- methods[ov_lgk] %in% overlap_methods$methods[[tmp.mth]] &
+      lgk[ov_lgk] %in% c(FALSE, NA)
+    if(any(mth_lgk)){
+      tmp.func <- get(tmp.mth)
+      lgk[ov_lgk[mth_lgk]] <- tmp.func(x[ov_lgk[mth_lgk]], y[ov_lgk[mth_lgk]])
+      if(all(lgk | is.na(lgk))){
+        break
+      }
     }
   }
-  # y_across_x
-  mth_lgk <- which(methods %in% overlap_methods$methods[["y_across_x"]] &
-                     lgk_2 %in% c(FALSE, NA) &
-                     ov_lgk)
-  if(length(mth_lgk) > 0){
-    lgk_2[mth_lgk] <- y_across_x(x[mth_lgk], y[mth_lgk])
-    if(all((lgk_2 == TRUE & !is.na(lgk_2)) | (!ov_lgk & !lgk_2))){
-      return(lgk_2)
-    }
-  }
-  # exact
-  mth_lgk <- which(methods %in% overlap_methods$methods[["exact"]] &
-                     lgk_2 %in% c(FALSE, NA) &
-                     ov_lgk)
-  if(length(mth_lgk) > 0){
-    lgk_2[mth_lgk] <- exact(x[mth_lgk], y[mth_lgk])
-    if(all((lgk_2 == TRUE & !is.na(lgk_2)) | (!ov_lgk & !lgk_2))){
-      return(lgk_2)
-    }
-  }
-  # x_inbetween_y
-  mth_lgk <- which(methods %in% overlap_methods$methods[["x_inbetween_y"]] &
-                     lgk_2 %in% c(FALSE, NA) &
-                     ov_lgk)
-  if(length(mth_lgk) > 0){
-    lgk_2[mth_lgk] <- x_inbetween_y(x[mth_lgk], y[mth_lgk])
-    if(all((lgk_2 == TRUE & !is.na(lgk_2)) | (!ov_lgk & !lgk_2))){
-      return(lgk_2)
-    }
-  }
-  # y_inbetween_x
-  mth_lgk <- which(methods %in% overlap_methods$methods[["y_inbetween_x"]] &
-                     lgk_2 %in% c(FALSE, NA) &
-                     ov_lgk)
-  if(length(mth_lgk) > 0){
-    lgk_2[mth_lgk] <- y_inbetween_x(x[mth_lgk], y[mth_lgk])
-    if(all((lgk_2 == TRUE & !is.na(lgk_2)) | (!ov_lgk & !lgk_2))){
-      return(lgk_2)
-    }
-  }
-  # x_aligns_start_y
-  mth_lgk <- which(methods %in% overlap_methods$methods[["x_aligns_start_y"]] &
-                     lgk_2 %in% c(FALSE, NA) &
-                     ov_lgk)
-  if(length(mth_lgk) > 0){
-    lgk_2[mth_lgk] <- x_aligns_start_y(x[mth_lgk], y[mth_lgk])
-    if(all((lgk_2 == TRUE & !is.na(lgk_2)) | (!ov_lgk & !lgk_2))){
-      return(lgk_2)
-    }
-  }
-  # y_aligns_start_x
-  mth_lgk <- which(methods %in% overlap_methods$methods[["y_aligns_start_x"]] &
-                     lgk_2 %in% c(FALSE, NA) &
-                     ov_lgk)
-  if(length(mth_lgk) > 0){
-    lgk_2[mth_lgk] <- y_aligns_start_x(x[mth_lgk], y[mth_lgk])
-    if(all((lgk_2 == TRUE & !is.na(lgk_2)) | (!ov_lgk & !lgk_2))){
-      return(lgk_2)
-    }
-  }
-  # x_aligns_end_y
-  mth_lgk <- which(methods %in% overlap_methods$methods[["x_aligns_end_y"]] &
-                     lgk_2 %in% c(FALSE, NA) &
-                     ov_lgk)
-  if(length(mth_lgk) > 0){
-    lgk_2[mth_lgk] <- x_aligns_end_y(x[mth_lgk], y[mth_lgk])
-    if(all((lgk_2 == TRUE & !is.na(lgk_2)) | (!ov_lgk & !lgk_2))){
-      return(lgk_2)
-    }
-  }
-  # y_aligns_end_x
-  mth_lgk <- which(methods %in% overlap_methods$methods[["y_aligns_end_x"]] &
-                     lgk_2 %in% c(FALSE, NA) &
-                     ov_lgk)
-  if(length(mth_lgk) > 0){
-    lgk_2[mth_lgk] <- y_aligns_end_x(x[mth_lgk], y[mth_lgk])
-    if(all((lgk_2 == TRUE & !is.na(lgk_2)) | (!ov_lgk & !lgk_2))){
-      return(lgk_2)
-    }
-  }
-  # x_chain_y
-  mth_lgk <- which(methods %in% overlap_methods$methods[["x_chain_y"]] &
-                     lgk_2 %in% c(FALSE, NA) &
-                     ov_lgk)
-  if(length(mth_lgk) > 0){
-    lgk_2[mth_lgk] <- x_chain_y(x[mth_lgk], y[mth_lgk])
-    if(all((lgk_2 == TRUE & !is.na(lgk_2)) | (!ov_lgk & !lgk_2))){
-      return(lgk_2)
-    }
-  }
-  # y_chain_x
-  mth_lgk <- which(methods %in% overlap_methods$methods[["y_chain_x"]] &
-                     lgk_2 %in% c(FALSE, NA) &
-                     ov_lgk)
-  if(length(mth_lgk) > 0){
-    lgk_2[mth_lgk] <- y_chain_x(x[mth_lgk], y[mth_lgk])
-    if(all((lgk_2 == TRUE & !is.na(lgk_2)) | (!ov_lgk & !lgk_2))){
-      return(lgk_2)
-    }
-  }
-  return(lgk_2)
+  return(lgk)
 }
 
 #' @rdname overlaps

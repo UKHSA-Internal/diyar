@@ -170,7 +170,7 @@ make_episodes <- function(
 
       if(!all(toupper(unlist(data_links, use.names = FALSE)) == "ANY")){
         req_links <- rst$rq
-        epidsepids <- suppressWarnings(delink(epids, !req_links))
+        epids <- suppressWarnings(delink(epids, !req_links))
         epids@epid_dataset[!req_links] <- data_source[!req_links]
       }
       epids@epid_dataset <- encode(epids@epid_dataset)
@@ -204,8 +204,8 @@ make_episodes <- function(
 }
 
 #' @rdname make_s4_ids
-make_pids <- function(x_pos,
-                      y_pos,
+make_pids <- function(y_pos,
+                      x_pos,
                       x_val,
                       link_id,
                       pid_cri,
@@ -234,7 +234,7 @@ make_pids <- function(x_pos,
 
       if(!all(toupper(data_links) == "ANY")){
         req_links <- rst$rq
-        pidspids <- suppressWarnings(delink(pids, !req_links))
+        pids <- suppressWarnings(delink(pids, !req_links))
         pids@pid_dataset[!req_links] <- data_source[!req_links]
       }
       pids@pid_dataset <- encode(pids@pid_dataset)

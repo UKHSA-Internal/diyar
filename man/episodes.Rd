@@ -2,7 +2,7 @@
 % Please edit documentation in R/episodes.R
 \name{episodes}
 \alias{episodes}
-\alias{links_wf_episodes}
+\alias{episodes_af_links}
 \alias{episodes_af_shift}
 \title{Group dated events into episodes.}
 \usage{
@@ -37,25 +37,29 @@ episodes(
   batched = "semi"
 )
 
-links_wf_episodes(
+episodes_af_links(
   date,
   case_length = Inf,
   episode_type = "fixed",
-  strata = NULL,
   sn = NULL,
+  episode_unit = "days",
+  strata = NULL,
+  data_source = NULL,
+  data_links = "ANY",
+  group_stats = FALSE,
   display = "none"
 )
 
 episodes_af_shift(
   date,
   case_length = Inf,
-  sn = NULL,
-  strata = NULL,
-  group_stats = FALSE,
   episode_type = "fixed",
-  data_source = NULL,
+  sn = NULL,
   episode_unit = "days",
+  strata = NULL,
+  data_source = NULL,
   data_links = "ANY",
+  group_stats = FALSE,
   display = "none"
 )
 }
@@ -166,7 +170,7 @@ Wrapper functions or alternative implementations of \bold{\code{episodes()}} for
 \itemize{
 \item \bold{\code{episodes_wf_repeats()}} - Identical records are excluded from the main analysis.
 \item \bold{\code{episodes_af_shift()}} - A mostly vectorised approach.
-\item \bold{\code{links_wf_episodes()}} - The same functionality achieved with \code{\link{links}}.
+\item \bold{\code{episodes_af_links()}} - The same functionality achieved with \code{\link{links}}.
 }
 
 See \code{vignette("episodes")} for further details.

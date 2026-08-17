@@ -21,6 +21,7 @@ to_df <- function(s4, ...) as.data.frame(s4, ...)
    if(any(names(lst) == "epid")){
      s4 <- methods::new("epid", .Data=lst$epid)
      s4@wind_id <- lst[grepl("wind_id", names(lst))]
+     s4@wind_nm <- lst[grepl("wind_nm", names(lst))]
      s4@epid_interval <- number_line(l = lst$epid_start,
                                      r = lst$epid_end,
                                      id = lst$sn,

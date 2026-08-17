@@ -17,7 +17,9 @@
 \alias{shift_number_line}
 \alias{expand_number_line}
 \alias{invert_number_line}
+\alias{flip_number_line}
 \alias{number_line_sequence}
+\alias{split_number_line}
 \title{\code{number_line}}
 \usage{
 number_line(l, r, id = NULL, gid = NULL)
@@ -52,6 +54,8 @@ expand_number_line(x, by = 1, point = "both")
 
 invert_number_line(x, point = "both")
 
+flip_number_line(x, point = "left")
+
 number_line_sequence(
   x,
   by = NULL,
@@ -59,6 +63,8 @@ number_line_sequence(
   fill = TRUE,
   simplify = FALSE
 )
+
+split_number_line(x, precision = 1, fill = TRUE, ...)
 }
 \arguments{
 \item{l}{\code{[numeric-based]}. Left point of the \code{number_line}.}
@@ -110,6 +116,8 @@ The \code{direction} argument specifies which type of \code{number_line} will be
 
 \bold{\code{invert_number_line()}} - Change the \code{left} or \code{right} points from a negative to positive value or vice versa.
 
+\bold{\code{flip_number_line()}} - Flip number around a \code{point}.
+
 \bold{\code{number_line_sequence()}} - Split a \code{number_line} into equal parts (\code{length.out}) or by a fixed recurring width (\code{by}).
 }
 \examples{
@@ -155,6 +163,12 @@ e
 invert_number_line(e)
 invert_number_line(e, "start")
 invert_number_line(e, "end")
+
+# Flip `number_line` objects
+e
+flip_number_line(e)
+flip_number_line(e, "start")
+flip_number_line(e, "left")
 
 # Split number line objects
 x <- number_line(Sys.Date() - 5, Sys.Date())

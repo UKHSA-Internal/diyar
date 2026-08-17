@@ -106,6 +106,20 @@ rep.d_label <- function(x, ...){
 
 #' @rdname encode
 #' @export
+c.d_label <- function(...) {
+  x <- list(...)
+  for(i in seq_len(length(x))){
+    if(attr(x[[i]], 'state') == 'encoded'){
+      x[[i]] <- decode(x[[i]])
+    }
+    x[[i]] <- as.vector(x[[i]])
+  }
+  x <- encode(do.call('c', x))
+  return(x)
+}
+
+#' @rdname encode
+#' @export
 `[[.d_label` <- function(x, i, ..., drop = TRUE) {
   y <- as.vector(x)[i]
   class(y) <- "d_label"

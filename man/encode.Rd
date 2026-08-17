@@ -9,6 +9,7 @@
 \alias{decode.d_label}
 \alias{rep.d_label}
 \alias{[.d_label}
+\alias{c.d_label}
 \alias{[[.d_label}
 \title{Labelling in \code{diyar}}
 \usage{
@@ -27,6 +28,8 @@ decode(x, ...)
 \method{rep}{d_label}(x, ...)
 
 \method{[}{d_label}(x, i, ..., drop = TRUE)
+
+\method{c}{d_label}(...)
 
 \method{[[}{d_label}(x, i, ..., drop = TRUE)
 }
