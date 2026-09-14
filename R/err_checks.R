@@ -381,7 +381,13 @@ err_sub_criteria_10b <- function(sub_criteria){
 }
 
 err_sub_criteria_3dot_1 <- function(...){
-  err <- lapply(flatten_list(list(...)), length)
+  err <- lapply(list(...), function(x){
+    if(inherits(x, 'sub_criteria')){
+      x <- unpack_sub_criteria(x)
+    }
+    return(x)
+  })
+  err <- lapply(flatten_list(err), length)
   err <- unlist(err, use.names = FALSE)
   err <- sort(err[!duplicated(err)])
   err2 <- err[err != 1]

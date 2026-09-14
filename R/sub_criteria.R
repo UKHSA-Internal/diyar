@@ -315,8 +315,8 @@ eval_sub_criteria.sub_criteria <- function(
         matches[[1]][new_index] <- matches[[i]][new.outputs]
         names(matches[[1]])[new_index] <- new.outputs
       }
-      matches[[i]] <- NULL
     }
+    matches[2:attr_n] <- NULL
   }
 
   return(matches[[1]])
